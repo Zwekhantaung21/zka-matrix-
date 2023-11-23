@@ -6,8 +6,7 @@ from pystrich.datamatrix import DataMatrixEncoder
 import shutil
 from fpdf import FPDF
 import datetime
-import io
-from flask import send_file
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -17,11 +16,15 @@ def index():
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.form['barcode-data']
-    img_stream = generate_ai_syntax_data_matrix_barcode(data)
+    encoded_data = data
+    generate_ai_syntax_data_matrix_barcode(encoded_data)
 
-    # Save the image data to a temporary file or serve it directly
-    # For simplicity, I'm just sending the image data as a response
-    return send_file(img_stream, mimetype='image/png')
+    # Generate PDF
+    pdf = generate_pdf(data)
+    pdf_path = "static/GS1Myanmar_Verify.pdf"
+    pdf.output(pdf_path)
+
+    return jsonify({'image_path': 'static/GS1MM_Datamatrix.png', 'pdf_path': pdf_path})
 
 @app.route('/download_zip')
 def download_zip():
@@ -48,16 +51,8 @@ def download_zip():
 
 def generate_ai_syntax_data_matrix_barcode(data):
     encoder = DataMatrixEncoder(data)
-    image_data = encoder.get_imagedata()
-
-    # Use io.BytesIO to create a file-like object from the image data
-    img_stream = io.BytesIO(image_data)
-
-    # Save the image to a temporary file or serve it directly
-    # For example, you can return it as a response in your Flask app
-    # For simplicity, I'm just returning the image data here
-    return img_stream
-
+    encoder.save("static/GS1MM_Datamatrix.png")
+    print("Data Matrix barcode with AI syntax generated successfully!")
 
 
 
