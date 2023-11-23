@@ -7,6 +7,7 @@ import shutil
 from fpdf import FPDF
 import datetime
 import tempfile
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -18,19 +19,14 @@ def index():
 def generate():
     data = request.form['barcode-data']
     encoded_data = data
+    image_data = generate_ai_syntax_data_matrix_barcode(encoded_data)
 
-    # Use a temporary directory
-    with tempfile.TemporaryDirectory() as temp_dir:
-        image_path = os.path.join(temp_dir, 'GS1MM_Datamatrix.png')
-        generate_ai_syntax_data_matrix_barcode(encoded_data, image_path)
+    # Generate PDF
+    pdf = generate_pdf(data)
+    pdf_path = "static/GS1Myanmar_Verify.pdf"
+    pdf.output(pdf_path)
 
-        # Generate PDF
-        pdf = generate_pdf(data)
-        pdf_path = os.path.join(temp_dir, 'GS1Myanmar_Verify.pdf')
-        pdf.output(pdf_path)
-
-        # Return the image and PDF paths in the response
-        return jsonify({'image_path': image_path, 'pdf_path': pdf_path})
+    return jsonify({'image_path': 'static/GS1MM_Datamatrix.png', 'pdf_path': pdf_path})
 
 @app.route('/download_zip')
 def download_zip():
@@ -57,9 +53,11 @@ def download_zip():
 
 def generate_ai_syntax_data_matrix_barcode(data):
     encoder = DataMatrixEncoder(data)
-    encoder.save("static/GS1MM_Datamatrix.png")
-    print("Data Matrix barcode with AI syntax generated successfully!")
-
+    
+    # Create a temporary file with a specific extension
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+        temp_filename = temp_file.name
+        encoder.save(temp_filename)
 
 
 def displayResult(data):
