@@ -19,7 +19,7 @@ def index():
 def generate():
     data = request.form['barcode-data']
     encoded_data = data
-    image_data = generate_ai_syntax_data_matrix_barcode(encoded_data)
+    temp_filename = generate_ai_syntax_data_matrix_barcode(encoded_data)
 
     # Generate PDF
     pdf = generate_pdf(data)
@@ -59,6 +59,7 @@ def generate_ai_syntax_data_matrix_barcode(data):
         temp_filename = temp_file.name
         encoder.save(temp_filename)
 
+    return temp_filename
 
 def displayResult(data):
     pc = ""
