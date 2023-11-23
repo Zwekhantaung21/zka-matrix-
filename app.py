@@ -6,6 +6,7 @@ from pystrich.datamatrix import DataMatrixEncoder
 import shutil
 from fpdf import FPDF
 import datetime
+import tempfile
 
 app = Flask(__name__)
 
@@ -17,14 +18,19 @@ def index():
 def generate():
     data = request.form['barcode-data']
     encoded_data = data
-    generate_ai_syntax_data_matrix_barcode(encoded_data)
 
-    # Generate PDF
-    pdf = generate_pdf(data)
-    pdf_path = "static/GS1Myanmar_Verify.pdf"
-    pdf.output(pdf_path)
+    # Use a temporary directory
+    with tempfile.TemporaryDirectory() as temp_dir:
+        image_path = os.path.join(temp_dir, 'GS1MM_Datamatrix.png')
+        generate_ai_syntax_data_matrix_barcode(encoded_data, image_path)
 
-    return jsonify({'image_path': 'static/GS1MM_Datamatrix.png', 'pdf_path': pdf_path})
+        # Generate PDF
+        pdf = generate_pdf(data)
+        pdf_path = os.path.join(temp_dir, 'GS1Myanmar_Verify.pdf')
+        pdf.output(pdf_path)
+
+        # Return the image and PDF paths in the response
+        return jsonify({'image_path': image_path, 'pdf_path': pdf_path})
 
 @app.route('/download_zip')
 def download_zip():
