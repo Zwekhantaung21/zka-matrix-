@@ -60,10 +60,15 @@ def generate_ai_syntax_data_matrix_barcode(data):
     temp_path = os.path.join(temp_directory, "GS1MM_Datamatrix.png")
     encoder.save(temp_path)
 
-    # Move the file to the desired location
+    # Copy the file to the desired location
     final_directory = "static"
     final_path = os.path.join(final_directory, "GS1MM_Datamatrix.png")
-    shutil.move(temp_path, final_path)
+    
+    # Use copy2 instead of move to ensure metadata is preserved
+    shutil.copy2(temp_path, final_path)
+
+    # Optional: Remove the temporary file
+    os.remove(temp_path)
 
     print("Data Matrix barcode with AI syntax generated successfully!")
 
