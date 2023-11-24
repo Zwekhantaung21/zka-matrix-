@@ -18,14 +18,14 @@ def index():
 def generate():
     data = request.form['barcode-data']
     encoded_data = data
-    generate_ai_syntax_data_matrix_barcode(encoded_data)
+    image_path = generate_ai_syntax_data_matrix_barcode(encoded_data)
 
     # Generate PDF
     pdf = generate_pdf(data)
     pdf_path = "static/GS1Myanmar_Verify.pdf"
     pdf.output(pdf_path)
 
-    return jsonify({'image_path': 'static/GS1MM_Datamatrix.png', 'pdf_path': pdf_path})
+    return send_file(image_path, mimetype='image/png'), 200, {'pdf_path': pdf_path}
 
 @app.route('/download_zip')
 def download_zip():
@@ -52,13 +52,12 @@ def download_zip():
 
 def generate_ai_syntax_data_matrix_barcode(data):
     encoder = DataMatrixEncoder(data)
+
+    # Use a temporary path for saving the image
     temp_path = "/tmp/GS1MM_Datamatrix.png"
     encoder.save(temp_path)
 
-    # Copy the file to the final destination
-    final_path = "static/GS1MM_Datamatrix.png"
-    shutil.copy2(temp_path, final_path)
-    print("Data Matrix barcode with AI syntax generated successfully!")
+    return temp_path
 
 
 
