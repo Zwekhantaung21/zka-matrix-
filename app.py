@@ -6,8 +6,6 @@ from pystrich.datamatrix import DataMatrixEncoder
 import shutil
 from fpdf import FPDF
 import datetime
-import tempfile
-from io import BytesIO
 
 app = Flask(__name__)
 
@@ -19,7 +17,7 @@ def index():
 def generate():
     data = request.form['barcode-data']
     encoded_data = data
-    temp_filename = generate_ai_syntax_data_matrix_barcode(encoded_data)
+    generate_ai_syntax_data_matrix_barcode(encoded_data)
 
     # Generate PDF
     pdf = generate_pdf(data)
@@ -53,13 +51,23 @@ def download_zip():
 
 def generate_ai_syntax_data_matrix_barcode(data):
     encoder = DataMatrixEncoder(data)
-    
-    # Create a temporary file with a specific extension
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
-        temp_filename = temp_file.name
-        encoder.save(temp_filename)
 
-    return temp_filename
+    # Use a temporary directory
+    temp_directory = "static/temp"
+    os.makedirs(temp_directory, exist_ok=True)
+
+    # Save the barcode image to the temporary directory
+    temp_path = os.path.join(temp_directory, "GS1MM_Datamatrix.png")
+    encoder.save(temp_path)
+
+    # Move the file to the desired location
+    final_path = "static/GS1MM_Datamatrix.png"
+    shutil.move(temp_path, final_path)
+
+    print("Data Matrix barcode with AI syntax generated successfully!")
+
+
+
 
 def displayResult(data):
     pc = ""
