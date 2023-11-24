@@ -6,6 +6,7 @@ from pystrich.datamatrix import DataMatrixEncoder
 import shutil
 from fpdf import FPDF
 import datetime
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -51,27 +52,13 @@ def download_zip():
 
 def generate_ai_syntax_data_matrix_barcode(data):
     encoder = DataMatrixEncoder(data)
-
-    # Use a writable directory for temporary storage
-    temp_directory = "/tmp"  # Change this to a writable directory on your server
-    os.makedirs(temp_directory, exist_ok=True)
-
-    # Save the barcode image to the temporary directory
-    temp_path = os.path.join(temp_directory, "GS1MM_Datamatrix.png")
+    temp_path = "/tmp/GS1MM_Datamatrix.png"
     encoder.save(temp_path)
 
-    # Copy the file to the desired location
-    final_directory = "static"
-    final_path = os.path.join(final_directory, "GS1MM_Datamatrix.png")
-    
-    # Use copy2 instead of move to ensure metadata is preserved
+    # Copy the file to the final destination
+    final_path = "static/GS1MM_Datamatrix.png"
     shutil.copy2(temp_path, final_path)
-
-    # Optional: Remove the temporary file
-    os.remove(temp_path)
-
     print("Data Matrix barcode with AI syntax generated successfully!")
-
 
 
 
