@@ -18,14 +18,19 @@ def index():
 def generate():
     data = request.form['barcode-data']
     encoded_data = data
-    image_path = generate_ai_syntax_data_matrix_barcode(encoded_data)
 
     # Generate PDF
     pdf = generate_pdf(data)
-    pdf_path = "static/GS1Myanmar_Verify.pdf"
-    pdf.output(pdf_path)
 
-    return send_file(image_path, mimetype='image/png'), 200, {'pdf_path': pdf_path}
+    # Save the PDF to a temporary location
+    temp_pdf_path = "/tmp/GS1Myanmar_Verify.pdf"
+    pdf.output(temp_pdf_path)
+
+    # Generate Data Matrix barcode
+    image_path = generate_ai_syntax_data_matrix_barcode(encoded_data)
+
+    return send_file(image_path, mimetype='image/png'), 200, {'pdf_path': temp_pdf_path}
+
 
 @app.route('/download_zip')
 def download_zip():
