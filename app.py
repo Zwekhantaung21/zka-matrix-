@@ -52,8 +52,8 @@ def download_zip():
 def generate_ai_syntax_data_matrix_barcode(data):
     encoder = DataMatrixEncoder(data)
 
-    # Use a temporary directory
-    temp_directory = "static/temp"
+    # Use a writable directory for temporary storage
+    temp_directory = "/tmp"  # Change this to a writable directory on your server
     os.makedirs(temp_directory, exist_ok=True)
 
     # Save the barcode image to the temporary directory
@@ -61,7 +61,8 @@ def generate_ai_syntax_data_matrix_barcode(data):
     encoder.save(temp_path)
 
     # Move the file to the desired location
-    final_path = "static/GS1MM_Datamatrix.png"
+    final_directory = "static"
+    final_path = os.path.join(final_directory, "GS1MM_Datamatrix.png")
     shutil.move(temp_path, final_path)
 
     print("Data Matrix barcode with AI syntax generated successfully!")
